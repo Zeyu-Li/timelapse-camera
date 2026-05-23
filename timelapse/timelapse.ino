@@ -1,3 +1,6 @@
+// make sure you enable EEPROM
+// Also see https://github.com/limengdu/SeeedStudio-XIAO-ESP32S3-Sense-camera/tree/main#camera-library-overview
+
 #include <EEPROM.h>
 #include "esp_camera.h"
 #include "FS.h"
@@ -196,9 +199,12 @@ void setup() {
     EEPROM.commit();
   }
 
-  // go to deep sleep for 6 hours
-  Serial.println("Entering deep sleep for 6 hours...");
-  esp_deep_sleep(photo_interval); // 6 hours in microseconds
+  if (DEBUG){
+    Serial.println("Entering deep sleep for 1 min...");
+  } else {
+    Serial.println("Entering deep sleep for 6 hours...");
+  }
+  esp_deep_sleep(photo_interval);
 }
 
 void loop() {
