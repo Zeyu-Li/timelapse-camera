@@ -17,7 +17,7 @@ int imageCount;                    // File Counter (persisted in EEPROM)
 bool camera_sign = false;          // Check camera status
 bool sd_sign = false;              // Check sd status
 // uint photo_interval = 21600000;    // Time interval for taking pictures (6 hours = 21600000 milliseconds)
-uint64_t photo_interval = DEBUG ? 60000000 : 21600000; // temp, set to 1 minute for testing (1 minute = 60000000 microseconds)
+uint64_t photo_interval = DEBUG ? 60000000 : 21600000000; // temp, set to 1 minute for testing (1 minute = 60000000 microseconds)
 #define EEPROM_SIZE 512
 #define IMAGE_COUNT_ADDR 0             // EEPROM address for storing imageCount
 
@@ -172,6 +172,8 @@ void setup() {
   if(camera_sign && sd_sign){
     char filename[32];
     uint bucket = imageCount % 4;
+    Serial.printf("imageCount=%d\n", imageCount);
+    Serial.printf("bucket=%u\n", bucket);
     switch (bucket) {
       case 0:
         sprintf(filename, "/bucket1/image%d.jpg", imageCount);
@@ -192,10 +194,10 @@ void setup() {
     Serial.println("Photos will begin in one minute, please be ready.");
     imageCount++;
     // Persist imageCount to EEPROM
+    if (DEBUG) {
+      EEPROM.writeInt(IMAGE_COUNT_ADDR, 0); // TODO: remove
+    }
     EEPROM.writeInt(IMAGE_COUNT_ADDR, imageCount);
-    // if (DEBUG) {
-    //   EEPROM.writeInt(IMAGE_COUNT_ADDR, 0); // TODO: remove
-    // }
     EEPROM.commit();
   }
 
@@ -203,8 +205,8 @@ void setup() {
     Serial.println("Entering deep sleep for 1 min...");
   } else {
     Serial.println("Entering deep sleep for 6 hours...");
+    esp_deep_sleep(photo_interval);
   }
-  esp_deep_sleep(photo_interval);
 }
 
 void loop() {
